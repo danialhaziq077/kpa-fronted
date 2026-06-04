@@ -247,7 +247,6 @@
         // --- 2. LISTEN FOR DATABASE REPLIES ---
         mqttClient.on('message', (topic, message) => {
             if (topic === 'utm/kpa/admin/response') {
-                console.log("📥 Received Database Data from Render Server!");
                 try {
                     app.state.dbSubmissions = JSON.parse(message.toString());
                     if (document.getElementById('view-admin-dashboard').classList.contains('active')) {
@@ -268,13 +267,9 @@
             if (viewId === 'view-admin-dashboard') {
                 document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="p-5 text-center text-slate-500">Loading data from Database...</td></tr>';
                 
-                // Only request data if we are actually connected to TinkerCode
                 if (isMqttConnected) {
-                    console.log("📤 Requesting database records... (Publishing to utm/kpa/admin/request)");
-                    // Added QoS 1 to guarantee delivery to the Render server
                     mqttClient.publish('utm/kpa/admin/request', 'get_all', { qos: 1 }); 
                     
-                    // 10 Second Safety Net Check
                     setTimeout(() => {
                         const countText = document.getElementById('submission-count').innerText;
                         if (countText === 'Loading DB...') {
@@ -287,8 +282,6 @@
                                 </tr>`;
                         }
                     }, 10000);
-                } else {
-                    document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="p-5 text-center text-red-500 font-bold">Error: Frontend lost connection to TinkerCode Broker.</td></tr>';
                 }
             }
         }
@@ -362,18 +355,16 @@
             const rowId = `row-${type}-${Date.now()}`;
             const div = document.createElement('div');
             div.id = rowId;
-            div.className = "grid grid-cols-1 md:grid-cols-4 gap-4 items-center border border-slate-100 p-4 rounded-xl mb-2 bg-slate-50/50 shadow-sm";
+            // Changed from grid-cols-4 to grid-cols-3 and removed file input
+            div.className = "grid grid-cols-1 md:grid-cols-3 gap-4 items-center border border-slate-100 p-4 rounded-xl mb-2 bg-slate-50/50 shadow-sm";
             div.innerHTML = `
                 <div class="md:col-span-2">
                     <input type="text" placeholder="Program Name" class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-name" required>
                 </div>
-                <div>
+                <div class="flex items-center space-x-3">
                     <select class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-pos">
                         ${Object.keys(app.state.matrix[type]).map(p => `<option value="${p}">${p}</option>`).join('')}
                     </select>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <input type="file" accept="image/*" class="w-full text-[10px] prog-file" required>
                     <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-slate-300 hover:text-red-500 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
@@ -391,33 +382,24 @@
             const matric = document.getElementById('form-matric').value;
             const phone = document.getElementById('form-phone').value;
 
-            const toBase64 = file => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-
-            const gatherSection = async (type) => {
+            const gatherSection = (type) => {
                 const rows = Array.from(document.getElementById(`container-${type}`).children);
                 const data = [];
                 let total = 0;
                 for (let row of rows) {
                     const name = row.querySelector('.prog-name').value;
                     const pos = row.querySelector('.prog-pos').value;
-                    const file = row.querySelector('.prog-file').files[0];
-                    if (!file) throw "Proof missing";
-                    const base64 = await toBase64(file);
                     const score = app.state.matrix[type][pos];
-                    data.push({ name, pos, base64, score });
+                    // Base64 image logic completely removed
+                    data.push({ name, pos, score });
                     total += score;
                 }
                 return { data, total };
             };
 
             try {
-                const inRes = await gatherSection('in');
-                const outRes = await gatherSection('out');
+                const inRes = gatherSection('in');
+                const outRes = gatherSection('out');
 
                 const payload = {
                     studentName: app.state.activeUser.name,
@@ -428,7 +410,6 @@
                     totalScore: inRes.total + outRes.total
                 };
 
-                // Added QoS 1 for reliable submission
                 mqttClient.publish('utm/kpa/submit', JSON.stringify(payload), { qos: 1 });
                 
                 alert("Application safely transmitted to the Database!");
@@ -436,7 +417,7 @@
                 document.getElementById('form-phone').value = '';
                 switchView('view-student-dashboard'); 
             } catch (err) {
-                alert("Error: Please ensure every program row has an image uploaded.");
+                alert("Error submitting application. Please try again.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<span>Submit Application</span>`;
@@ -494,16 +475,16 @@
 
                 <div class="space-y-12">
                     <div>
-                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-blue-500 pl-4 uppercase tracking-tight">College Activity Proofs</h5>
+                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-blue-500 pl-4 uppercase tracking-tight">College Programs Submitted</h5>
                         ${sub.programs?.in?.length > 0 
-                            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">${sub.programs.in.map(p => renderProofCard(p, 'blue')).join('')}</div>`
+                            ? `<div class="grid grid-cols-1 gap-3">${sub.programs.in.map(p => renderProofCard(p, 'blue')).join('')}</div>`
                             : `<p class="text-slate-400 italic text-sm">No college programs submitted.</p>`
                         }
                     </div>
                     <div>
-                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-emerald-500 pl-4 uppercase tracking-tight">External Activity Proofs</h5>
+                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-emerald-500 pl-4 uppercase tracking-tight">External Programs Submitted</h5>
                         ${sub.programs?.out?.length > 0 
-                            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">${sub.programs.out.map(p => renderProofCard(p, 'emerald')).join('')}</div>`
+                            ? `<div class="grid grid-cols-1 gap-3">${sub.programs.out.map(p => renderProofCard(p, 'emerald')).join('')}</div>`
                             : `<p class="text-slate-400 italic text-sm">No external programs submitted.</p>`
                         }
                     </div>
@@ -514,20 +495,10 @@
 
         function renderProofCard(p, color) {
             return `
-                <div class="group border border-slate-200 rounded-3xl overflow-hidden bg-white hover:border-${color}-300 transition-all flex flex-col">
-                    <div class="aspect-video relative overflow-hidden bg-slate-100 flex items-center justify-center">
-                        <img src="${p.base64}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Proof Image">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                             <button type="button" onclick="const w = window.open(''); w.document.write('<img src=\\'${p.base64}\\' style=\\'max-width: 100%;\\'>');" class="bg-white/90 backdrop-blur px-4 py-2 rounded-lg text-xs font-bold text-slate-900 shadow-xl hover:bg-white transition-colors">
-                                View Full Image
-                             </button>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-2">
-                            <p class="font-bold text-slate-800 text-lg leading-tight pr-4">${p.name}</p>
-                            <span class="bg-${color}-50 text-${color}-700 px-3 py-1 rounded-lg text-[10px] font-black border border-${color}-100 uppercase text-center min-w-max">${p.pos}</span>
-                        </div>
+                <div class="group border border-slate-200 rounded-xl bg-white flex flex-col p-4 shadow-sm hover:border-${color}-300 transition-all">
+                    <div class="flex justify-between items-center">
+                        <p class="font-bold text-slate-800 text-md leading-tight pr-4">${p.name}</p>
+                        <span class="bg-${color}-50 text-${color}-700 px-3 py-1 rounded-lg text-[10px] font-black border border-${color}-100 uppercase text-center min-w-max">${p.pos}</span>
                     </div>
                 </div>
             `;
