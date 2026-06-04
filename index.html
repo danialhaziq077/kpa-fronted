@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUOTA PELAJAR AKTIF - Academic Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .hidden { display: none !important; }
+        .view-section:not(.active) { display: none !important; }
+        .view-section.active { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800">
+
+    <div id="app">
+        <section id="view-role-selection" class="view-section active min-h-screen flex flex-col items-center justify-center p-6 text-center">
+            <div class="mb-12">
+                <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">KUOTA PELAJAR AKTIF</h1>
+                <p class="text-slate-500 text-lg">Official Academic Activity Verification Portal</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+                <button onclick="switchView('view-student-auth')" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-500 hover:ring-4 hover:ring-blue-50 transition-all group">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                    </div>
+                    <span class="text-2xl font-bold text-slate-800">Login as Student</span>
+                </button>
+                <button onclick="switchView('view-admin-login')" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm hover:border-slate-900 hover:ring-4 hover:ring-slate-100 transition-all group">
+                    <div class="w-16 h-16 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <span class="text-2xl font-bold text-slate-800">Login as Administrator</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="view-student-auth" class="view-section min-h-screen flex items-center justify-center p-6">
+            <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+                <div id="student-login-box">
+                    <h2 class="text-2xl font-bold mb-2">Student Login</h2>
+                    <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+                        <input type="email" id="stu-login-email" placeholder="Email Address" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="password" id="stu-login-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg">Login</button>
+                    </form>
+                    <p class="mt-6 text-center text-sm text-slate-500">Don't have an account? <a href="#" onclick="toggleStudentForms(true)" class="text-blue-600 font-bold">Register</a></p>
+                </div>
+                <div id="student-register-box" class="hidden">
+                    <h2 class="text-2xl font-bold mb-2">Create Account</h2>
+                    <form onsubmit="handleStudentRegister(event)" class="space-y-4">
+                        <input type="text" id="stu-reg-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="email" id="stu-reg-email" placeholder="UTM Email (@graduate.utm.my)" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="password" id="stu-reg-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black shadow-lg">Register Account</button>
+                    </form>
+                    <p class="mt-6 text-center text-sm text-slate-500">Already have an account? <a href="#" onclick="toggleStudentForms(false)" class="text-blue-600 font-bold">Login</a></p>
+                </div>
+                <button onclick="switchView('view-role-selection')" class="mt-4 w-full text-slate-400 text-sm hover:text-slate-600">← Back</button>
+            </div>
+        </section>
+
+        <section id="view-admin-login" class="view-section min-h-screen flex items-center justify-center p-6">
+            <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-4 border-slate-900">
+                <h2 class="text-2xl font-bold mb-8 text-slate-900">Administrator Access</h2>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                    <input type="email" id="admin-login-email" placeholder="Admin Email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 outline-none">
+                    <input type="password" id="admin-login-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 outline-none">
+                    <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black shadow-lg">Access Admin Panel</button>
+                </form>
+                <button onclick="switchView('view-role-selection')" class="mt-6 w-full text-slate-400 text-sm hover:text-slate-600">← Back</button>
+            </div>
+        </section>
+
+        <section id="view-student-dashboard" class="view-section min-h-screen pb-20">
+            <header class="flex justify-between items-center w-full p-4 bg-white shadow-sm sticky top-0 z-10 border-b border-slate-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">K</div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">KUOTA PELAJAR AKTIF</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <p class="text-sm font-medium text-slate-500">Student: <span id="display-name" class="font-bold text-blue-600"></span></p>
+                    <button onclick="handleLogout()" class="bg-slate-50 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-100 transition-colors">Logout</button>
+                </div>
+            </header>
+
+            <main class="max-w-5xl mx-auto mt-10 px-6">
+                <form onsubmit="handleApplicationSubmit(event)" class="space-y-10">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                        <h3 class="text-lg font-bold mb-6 flex items-center text-slate-800">
+                            <span class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mr-3 text-sm">1</span> Personal Information
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Full Name</label>
+                                <input type="text" id="form-name" readonly class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Matric Number</label>
+                                <input type="text" id="form-matric" required placeholder="A21EC0000" class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Phone Number</label>
+                                <input type="tel" id="form-phone" required placeholder="012-3456789" class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-10">
+                        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-bold flex items-center text-slate-800">
+                                    <span class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mr-3 text-sm">2</span> Programs in College
+                                </h3>
+                                <button type="button" onclick="addProgramRow('in')" class="text-sm font-bold text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors">+ Add Program</button>
+                            </div>
+                            <div id="container-in" class="space-y-3"></div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-bold flex items-center text-slate-800">
+                                    <span class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mr-3 text-sm">3</span> Programs outside College
+                                </h3>
+                                <button type="button" onclick="addProgramRow('out')" class="text-sm font-bold text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors">+ Add Program</button>
+                            </div>
+                            <div id="container-out" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center pt-6">
+                        <button type="submit" id="submit-btn" class="w-full max-w-lg bg-green-600 text-white py-5 rounded-2xl font-bold text-xl hover:bg-green-700 shadow-xl shadow-green-100 flex justify-center space-x-3 transition-all">
+                            <span>Submit Application</span>
+                        </button>
+                    </div>
+                </form>
+            </main>
+        </section>
+
+        <section id="view-admin-dashboard" class="view-section min-h-screen pb-20">
+            <header class="flex justify-between items-center w-full p-4 bg-slate-900 shadow-md sticky top-0 z-10 text-white">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center font-bold text-xl border border-white/20">K</div>
+                    <h1 class="text-xl font-bold tracking-tight">Admin Dashboard - KUOTA PELAJAR AKTIF</h1>
+                </div>
+                <button onclick="handleLogout()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-xs font-bold transition-colors">Logout</button>
+            </header>
+
+            <main class="max-w-6xl mx-auto mt-10 px-6">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Live Database Tier List</h3>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase" id="submission-count">Loading DB...</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="p-5 text-xs font-bold text-slate-400 uppercase">Rank</th>
+                                    <th class="p-5 text-xs font-bold text-slate-400 uppercase">Full Name</th>
+                                    <th class="p-5 text-xs font-bold text-slate-400 uppercase">Matric Number</th>
+                                    <th class="p-5 text-xs font-bold text-slate-400 uppercase text-center">Total Score</th>
+                                    <th class="p-5 text-xs font-bold text-slate-400 uppercase text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <div id="admin-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div class="bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl flex flex-col">
+                <div class="p-8 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-20">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">Activity Verification</h2>
+                    </div>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-900 transition-colors">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div id="modal-content" class="p-8 space-y-10 flex-grow"></div>
+                <div class="p-8 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center sticky bottom-0 z-20">
+                    <button onclick="deleteSubmission()" class="px-6 py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center space-x-2">
+                        <span>Delete DB Record</span>
+                    </button>
+                    <div class="flex space-x-4">
+                        <button onclick="closeModal()" class="px-8 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors">Cancel</button>
+                        <button onclick="saveAdminOverride()" class="px-8 py-3 rounded-xl font-bold bg-green-600 text-white hover:bg-green-700 transition-all shadow-lg shadow-green-100">Save Final Score</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. CONNECT FRONTEND TO TINKERCODE ---
+        const brokerUrl = 'wss://tinkercode.my:8001';
+        const mqttClient = mqtt.connect(brokerUrl);
+
+        mqttClient.on('connect', () => {
+            console.log('🌐 Frontend connected to TinkerCode!');
+            mqttClient.subscribe('utm/kpa/admin/response'); // Listen for DB updates
+        });
+
+        const app = {
+            state: {
+                users: JSON.parse(localStorage.getItem('users')) || [],
+                dbSubmissions: [], // This now only gets filled by the real database!
+                activeUser: null,
+                matrix: {
+                    in: { "Pengarah": 100, "Timbalan Pengarah": 80, "Setiausaha": 80, "Bendahari": 80, "AJK Program": 70, "Peserta": 60 },
+                    out: { "Pengarah": 50, "Timbalan Pengarah": 30, "Setiausaha": 30, "Bendahari": 30, "AJK Program": 20, "Peserta": 10 }
+                },
+                currentAdminViewId: null
+            },
+
+            init() {
+                const session = localStorage.getItem('logged_in_email');
+                if (session) {
+                    const user = this.state.users.find(u => u.email === session);
+                    if (user) {
+                        this.state.activeUser = user;
+                        switchView('view-student-dashboard');
+                    }
+                }
+            }
+        };
+
+        // --- 2. LISTEN FOR DATABASE REPLIES ---
+        mqttClient.on('message', (topic, message) => {
+            if (topic === 'utm/kpa/admin/response') {
+                app.state.dbSubmissions = JSON.parse(message.toString());
+                if (document.getElementById('view-admin-dashboard').classList.contains('active')) {
+                    renderLeaderboard(); // Auto update the table visually
+                }
+            }
+        });
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0,0);
+
+            if (viewId === 'view-student-dashboard') populateStudentForm();
+            if (viewId === 'view-admin-dashboard') {
+                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="p-5 text-center text-slate-500">Loading data from Database...</td></tr>';
+                // Ask the server for the latest DB rows
+                mqttClient.publish('utm/kpa/admin/request', 'get_all'); 
+            }
+        }
+
+        function toggleStudentForms(showRegister) {
+            document.getElementById('student-login-box').classList.toggle('hidden', showRegister);
+            document.getElementById('student-register-box').classList.toggle('hidden', !showRegister);
+        }
+
+        function closeModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        // --- Auth Logic (Still uses localStorage for simplicity) ---
+        function handleStudentRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('stu-reg-name').value;
+            const email = document.getElementById('stu-reg-email').value;
+            const pass = document.getElementById('stu-reg-pass').value;
+
+            if (!email.endsWith('@graduate.utm.my')) return alert("Error: Must use @graduate.utm.my email.");
+            if (app.state.users.find(u => u.email === email)) return alert("Email already registered.");
+
+            app.state.users.push({ name, email, pass });
+            localStorage.setItem('users', JSON.stringify(app.state.users));
+            alert("Registration successful! You can now login.");
+            toggleStudentForms(false);
+        }
+
+        function handleStudentLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('stu-login-email').value;
+            const pass = document.getElementById('stu-login-pass').value;
+            const user = app.state.users.find(u => u.email === email && u.pass === pass);
+
+            if (user) {
+                app.state.activeUser = user;
+                localStorage.setItem('logged_in_email', email);
+                switchView('view-student-dashboard');
+            } else alert("Invalid credentials.");
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('admin-login-email').value;
+            const pass = document.getElementById('admin-login-pass').value;
+            if (email === "danialhaziq@utm.my" && pass === "12345678") {
+                switchView('view-admin-dashboard');
+            } else alert("Access Denied.");
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('logged_in_email');
+            location.reload();
+        }
+
+        // --- Student Dashboard Logic ---
+        function populateStudentForm() {
+            document.getElementById('display-name').innerText = app.state.activeUser.name;
+            document.getElementById('form-name').value = app.state.activeUser.name;
+            document.getElementById('container-in').innerHTML = '';
+            document.getElementById('container-out').innerHTML = '';
+            addProgramRow('in');
+            addProgramRow('out');
+        }
+
+        function addProgramRow(type) {
+            const container = document.getElementById(`container-${type}`);
+            if (container.children.length >= 5) return;
+
+            const rowId = `row-${type}-${Date.now()}`;
+            const div = document.createElement('div');
+            div.id = rowId;
+            div.className = "grid grid-cols-1 md:grid-cols-4 gap-4 items-center border border-slate-100 p-4 rounded-xl mb-2 bg-slate-50/50 shadow-sm";
+            div.innerHTML = `
+                <div class="md:col-span-2">
+                    <input type="text" placeholder="Program Name" class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-name" required>
+                </div>
+                <div>
+                    <select class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-pos">
+                        ${Object.keys(app.state.matrix[type]).map(p => `<option value="${p}">${p}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <input type="file" accept="image/*" class="w-full text-[10px] prog-file" required>
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-slate-300 hover:text-red-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        async function handleApplicationSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            const matric = document.getElementById('form-matric').value;
+            const phone = document.getElementById('form-phone').value;
+
+            const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+
+            const gatherSection = async (type) => {
+                const rows = Array.from(document.getElementById(`container-${type}`).children);
+                const data = [];
+                let total = 0;
+                for (let row of rows) {
+                    const name = row.querySelector('.prog-name').value;
+                    const pos = row.querySelector('.prog-pos').value;
+                    const file = row.querySelector('.prog-file').files[0];
+                    if (!file) throw "Proof missing";
+                    const base64 = await toBase64(file);
+                    const score = app.state.matrix[type][pos];
+                    data.push({ name, pos, base64, score });
+                    total += score;
+                }
+                return { data, total };
+            };
+
+            try {
+                // WARNING: Large image files will crash the MQTT payload. Use small screenshots for testing!
+                const inRes = await gatherSection('in');
+                const outRes = await gatherSection('out');
+
+                const payload = {
+                    studentName: app.state.activeUser.name,
+                    matric,
+                    phone,
+                    student_email: app.state.activeUser.email,
+                    programs: { in: inRes.data, out: outRes.data },
+                    totalScore: inRes.total + outRes.total
+                };
+
+                // PUBLISH TO TINKERCODE FOR THE SERVER TO SAVE TO MYSQL
+                mqttClient.publish('utm/kpa/submit', JSON.stringify(payload));
+                
+                alert("Application safely transmitted to the Database!");
+                document.getElementById('form-matric').value = '';
+                document.getElementById('form-phone').value = '';
+                switchView('view-student-dashboard'); 
+            } catch (err) {
+                alert("Error: Please ensure every program row has an image uploaded.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Submit Application</span>`;
+            }
+        }
+
+        // --- Admin Dashboard Logic ---
+        function renderLeaderboard() {
+            const body = document.getElementById('leaderboard-body');
+            const count = document.getElementById('submission-count');
+            
+            body.innerHTML = '';
+            count.innerText = `${app.state.dbSubmissions.length} DB Records`;
+
+            app.state.dbSubmissions.forEach((sub, index) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-colors group";
+                row.innerHTML = `
+                    <td class="p-5 text-sm font-bold text-slate-900">#${index + 1}</td>
+                    <td class="p-5 text-sm font-semibold text-slate-700">${sub.studentName || 'Unknown'}</td>
+                    <td class="p-5 text-sm text-slate-500 font-mono">${sub.matric || 'Unknown'}</td>
+                    <td class="p-5 text-center">
+                        <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-sm font-black border border-blue-100">${sub.totalScore}</span>
+                    </td>
+                    <td class="p-5 text-right">
+                        <button onclick="openVerification('${sub.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm">View DB Details</button>
+                    </td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        function openVerification(id) {
+            app.state.currentAdminViewId = id;
+            const sub = app.state.dbSubmissions.find(s => s.id == id);
+            if (!sub) return;
+
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 bg-slate-50 p-8 rounded-3xl border border-slate-100">
+                    <div>
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Student Credentials</h4>
+                        <p class="text-3xl font-bold text-slate-900 mb-1">${sub.studentName || 'Unknown'}</p>
+                        <p class="text-slate-500 font-mono text-sm">${sub.matric || 'N/A'} | ${sub.phone || 'N/A'}</p>
+                        <p class="text-slate-400 text-xs mt-2 italic">Database ID: ${sub.id}</p>
+                    </div>
+                    <div class="flex flex-col items-end justify-center">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Verification Score</h4>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-slate-300 text-sm italic">Current DB Score:</span>
+                            <input type="number" id="override-score" value="${sub.totalScore}" class="text-5xl font-black text-blue-600 bg-transparent border-b-4 border-blue-200 w-32 text-right focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-12">
+                    <div>
+                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-blue-500 pl-4 uppercase tracking-tight">College Activity Proofs</h5>
+                        ${sub.programs?.in?.length > 0 
+                            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">${sub.programs.in.map(p => renderProofCard(p, 'blue')).join('')}</div>`
+                            : `<p class="text-slate-400 italic text-sm">No college programs submitted.</p>`
+                        }
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-emerald-500 pl-4 uppercase tracking-tight">External Activity Proofs</h5>
+                        ${sub.programs?.out?.length > 0 
+                            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">${sub.programs.out.map(p => renderProofCard(p, 'emerald')).join('')}</div>`
+                            : `<p class="text-slate-400 italic text-sm">No external programs submitted.</p>`
+                        }
+                    </div>
+                </div>
+            `;
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
+
+        function renderProofCard(p, color) {
+            return `
+                <div class="group border border-slate-200 rounded-3xl overflow-hidden bg-white hover:border-${color}-300 transition-all flex flex-col">
+                    <div class="aspect-video relative overflow-hidden bg-slate-100 flex items-center justify-center">
+                        <img src="${p.base64}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Proof Image">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                             <button type="button" onclick="const w = window.open(''); w.document.write('<img src=\\'${p.base64}\\' style=\\'max-width: 100%;\\'>');" class="bg-white/90 backdrop-blur px-4 py-2 rounded-lg text-xs font-bold text-slate-900 shadow-xl hover:bg-white transition-colors">
+                                View Full Image
+                             </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-bold text-slate-800 text-lg leading-tight pr-4">${p.name}</p>
+                            <span class="bg-${color}-50 text-${color}-700 px-3 py-1 rounded-lg text-[10px] font-black border border-${color}-100 uppercase text-center min-w-max">${p.pos}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Database Action Commands ---
+        function saveAdminOverride() {
+            const newScore = parseInt(document.getElementById('override-score').value);
+            // Command the Node.js Server to update the database
+            mqttClient.publish('utm/kpa/admin/update_score', JSON.stringify({ 
+                id: app.state.currentAdminViewId, 
+                newScore: newScore 
+            }));
+            closeModal();
+            // The table will auto-update when the server broadcasts the new leaderboard!
+        }
+
+        function deleteSubmission() {
+            const confirmDelete = confirm("Are you sure you want to permanently delete this student's submission from the MySQL Database?");
+            if (confirmDelete) {
+                // Command the Node.js Server to delete the row
+                mqttClient.publish('utm/kpa/admin/delete', app.state.currentAdminViewId.toString());
+                closeModal();
+                // The table will auto-update when the server broadcasts the new leaderboard!
+            }
+        }
+
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
