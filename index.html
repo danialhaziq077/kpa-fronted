@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KUOTA PELAJAR AKTIF - Academic Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
@@ -19,7 +18,6 @@
 <body class="min-h-screen text-slate-800">
 
     <div id="app">
-        <!-- Role Selection -->
         <section id="view-role-selection" class="view-section active min-h-screen flex flex-col items-center justify-center p-6 text-center">
             <div class="mb-12">
                 <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">KUOTA PELAJAR AKTIF</h1>
@@ -28,7 +26,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
                 <button onclick="switchView('view-student-auth')" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-500 hover:ring-4 hover:ring-blue-50 transition-all group">
                     <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
                     </div>
                     <span class="text-2xl font-bold text-slate-800">Login as Student</span>
                 </button>
@@ -41,7 +39,6 @@
             </div>
         </section>
 
-        <!-- Student Auth -->
         <section id="view-student-auth" class="view-section min-h-screen flex items-center justify-center p-6">
             <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
                 <div id="student-login-box">
@@ -67,7 +64,6 @@
             </div>
         </section>
 
-        <!-- Admin Login -->
         <section id="view-admin-login" class="view-section min-h-screen flex items-center justify-center p-6">
             <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-4 border-slate-900">
                 <h2 class="text-2xl font-bold mb-8 text-slate-900">Administrator Access</h2>
@@ -80,7 +76,6 @@
             </div>
         </section>
 
-        <!-- Student Dashboard -->
         <section id="view-student-dashboard" class="view-section min-h-screen pb-20">
             <header class="flex justify-between items-center w-full p-4 bg-white shadow-sm sticky top-0 z-10 border-b border-slate-100">
                 <div class="flex items-center space-x-3">
@@ -146,7 +141,6 @@
             </main>
         </section>
 
-        <!-- Admin Dashboard -->
         <section id="view-admin-dashboard" class="view-section min-h-screen pb-20">
             <header class="flex justify-between items-center w-full p-4 bg-slate-900 shadow-md sticky top-0 z-10 text-white">
                 <div class="flex items-center space-x-3">
@@ -180,7 +174,6 @@
             </main>
         </section>
 
-        <!-- Admin Detail Modal -->
         <div id="admin-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl flex flex-col">
                 <div class="p-8 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-20">
@@ -206,20 +199,11 @@
     </div>
 
     <script>
-        // --- 1. CONNECT FRONTEND TO TINKERCODE ---
-        const brokerUrl = 'wss://tinkercode.my:8001';
-        const mqttClient = mqtt.connect(brokerUrl);
-        let isMqttConnected = false;
-
-        mqttClient.on('connect', () => {
-            console.log('🌐 Frontend connected to TinkerCode!');
-            isMqttConnected = true;
-            mqttClient.subscribe('utm/kpa/admin/response'); 
-        });
-
-        mqttClient.on('error', (err) => {
-            console.error('MQTT Connection Error:', err);
-        });
+        // ====================================================================
+        // IMPORTANT: CHANGE THIS URL TO YOUR ACTUAL RENDER BACKEND URL!
+        // ====================================================================
+        const API_URL = 'https://kpa-backend-1.onrender.com/api'; 
+        // ====================================================================
 
         const app = {
             state: {
@@ -244,20 +228,6 @@
             }
         };
 
-        // --- 2. LISTEN FOR DATABASE REPLIES ---
-        mqttClient.on('message', (topic, message) => {
-            if (topic === 'utm/kpa/admin/response') {
-                try {
-                    app.state.dbSubmissions = JSON.parse(message.toString());
-                    if (document.getElementById('view-admin-dashboard').classList.contains('active')) {
-                        renderLeaderboard(); 
-                    }
-                } catch(e) {
-                    console.error("Failed to parse database records:", e);
-                }
-            }
-        });
-
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -267,22 +237,17 @@
             if (viewId === 'view-admin-dashboard') {
                 document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="p-5 text-center text-slate-500">Loading data from Database...</td></tr>';
                 
-                if (isMqttConnected) {
-                    mqttClient.publish('utm/kpa/admin/request', 'get_all', { qos: 1 }); 
-                    
-                    setTimeout(() => {
-                        const countText = document.getElementById('submission-count').innerText;
-                        if (countText === 'Loading DB...') {
-                            document.getElementById('leaderboard-body').innerHTML = `
-                                <tr>
-                                    <td colspan="5" class="p-10 text-center text-red-500 font-bold bg-red-50">
-                                        ❌ ERROR: The Render Server did not respond within 10 seconds.<br>
-                                        <span class="text-sm font-normal text-slate-600">Please check your server.js code and Render logs.</span>
-                                    </td>
-                                </tr>`;
-                        }
-                    }, 10000);
-                }
+                // Fetch Data using Standard HTTP instead of MQTT
+                fetch(`${API_URL}/submissions`)
+                    .then(res => res.json())
+                    .then(data => {
+                        app.state.dbSubmissions = data;
+                        renderLeaderboard();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="p-5 text-center text-red-500 font-bold">Error: Failed to connect to Render server.</td></tr>';
+                    });
             }
         }
 
@@ -355,16 +320,18 @@
             const rowId = `row-${type}-${Date.now()}`;
             const div = document.createElement('div');
             div.id = rowId;
-            // Changed from grid-cols-4 to grid-cols-3 and removed file input
-            div.className = "grid grid-cols-1 md:grid-cols-3 gap-4 items-center border border-slate-100 p-4 rounded-xl mb-2 bg-slate-50/50 shadow-sm";
+            div.className = "grid grid-cols-1 md:grid-cols-4 gap-4 items-center border border-slate-100 p-4 rounded-xl mb-2 bg-slate-50/50 shadow-sm";
             div.innerHTML = `
                 <div class="md:col-span-2">
                     <input type="text" placeholder="Program Name" class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-name" required>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div>
                     <select class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-pos">
                         ${Object.keys(app.state.matrix[type]).map(p => `<option value="${p}">${p}</option>`).join('')}
                     </select>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <input type="file" accept="image/*" class="w-full text-[10px] prog-file" required>
                     <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-slate-300 hover:text-red-500 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
@@ -377,29 +344,38 @@
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
-            btn.innerText = "Processing...";
+            btn.innerText = "Processing & Uploading...";
 
             const matric = document.getElementById('form-matric').value;
             const phone = document.getElementById('form-phone').value;
 
-            const gatherSection = (type) => {
+            const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+
+            const gatherSection = async (type) => {
                 const rows = Array.from(document.getElementById(`container-${type}`).children);
                 const data = [];
                 let total = 0;
                 for (let row of rows) {
                     const name = row.querySelector('.prog-name').value;
                     const pos = row.querySelector('.prog-pos').value;
+                    const file = row.querySelector('.prog-file').files[0];
+                    if (!file) throw "Proof missing";
+                    const base64 = await toBase64(file);
                     const score = app.state.matrix[type][pos];
-                    // Base64 image logic completely removed
-                    data.push({ name, pos, score });
+                    data.push({ name, pos, base64, score });
                     total += score;
                 }
                 return { data, total };
             };
 
             try {
-                const inRes = gatherSection('in');
-                const outRes = gatherSection('out');
+                const inRes = await gatherSection('in');
+                const outRes = await gatherSection('out');
 
                 const payload = {
                     studentName: app.state.activeUser.name,
@@ -410,14 +386,22 @@
                     totalScore: inRes.total + outRes.total
                 };
 
-                mqttClient.publish('utm/kpa/submit', JSON.stringify(payload), { qos: 1 });
-                
+                // Use Standard HTTP POST to send the large payload securely
+                const response = await fetch(`${API_URL}/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Server rejected the submission");
+
                 alert("Application safely transmitted to the Database!");
                 document.getElementById('form-matric').value = '';
                 document.getElementById('form-phone').value = '';
                 switchView('view-student-dashboard'); 
             } catch (err) {
-                alert("Error submitting application. Please try again.");
+                console.error(err);
+                alert("Error submitting application. Check your connection.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<span>Submit Application</span>`;
@@ -454,6 +438,12 @@
             app.state.currentAdminViewId = id;
             const sub = app.state.dbSubmissions.find(s => s.id == id);
             if (!sub) return;
+            
+            // Re-parse the JSON string back into a javascript object to display the images
+            let parsedPrograms = sub.programs;
+            if (typeof parsedPrograms === 'string') {
+                try { parsedPrograms = JSON.parse(parsedPrograms); } catch (e) {}
+            }
 
             const modalContent = document.getElementById('modal-content');
             modalContent.innerHTML = `
@@ -475,16 +465,16 @@
 
                 <div class="space-y-12">
                     <div>
-                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-blue-500 pl-4 uppercase tracking-tight">College Programs Submitted</h5>
-                        ${sub.programs?.in?.length > 0 
-                            ? `<div class="grid grid-cols-1 gap-3">${sub.programs.in.map(p => renderProofCard(p, 'blue')).join('')}</div>`
+                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-blue-500 pl-4 uppercase tracking-tight">College Activity Proofs</h5>
+                        ${parsedPrograms?.in?.length > 0 
+                            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">${parsedPrograms.in.map(p => renderProofCard(p, 'blue')).join('')}</div>`
                             : `<p class="text-slate-400 italic text-sm">No college programs submitted.</p>`
                         }
                     </div>
                     <div>
-                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-emerald-500 pl-4 uppercase tracking-tight">External Programs Submitted</h5>
-                        ${sub.programs?.out?.length > 0 
-                            ? `<div class="grid grid-cols-1 gap-3">${sub.programs.out.map(p => renderProofCard(p, 'emerald')).join('')}</div>`
+                        <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-emerald-500 pl-4 uppercase tracking-tight">External Activity Proofs</h5>
+                        ${parsedPrograms?.out?.length > 0 
+                            ? `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">${parsedPrograms.out.map(p => renderProofCard(p, 'emerald')).join('')}</div>`
                             : `<p class="text-slate-400 italic text-sm">No external programs submitted.</p>`
                         }
                     </div>
@@ -495,29 +485,44 @@
 
         function renderProofCard(p, color) {
             return `
-                <div class="group border border-slate-200 rounded-xl bg-white flex flex-col p-4 shadow-sm hover:border-${color}-300 transition-all">
-                    <div class="flex justify-between items-center">
-                        <p class="font-bold text-slate-800 text-md leading-tight pr-4">${p.name}</p>
-                        <span class="bg-${color}-50 text-${color}-700 px-3 py-1 rounded-lg text-[10px] font-black border border-${color}-100 uppercase text-center min-w-max">${p.pos}</span>
+                <div class="group border border-slate-200 rounded-3xl overflow-hidden bg-white hover:border-${color}-300 transition-all flex flex-col">
+                    <div class="aspect-video relative overflow-hidden bg-slate-100 flex items-center justify-center">
+                        <img src="${p.base64}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Proof Image">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+                             <button type="button" onclick="const w = window.open(''); w.document.write('<img src=\\'${p.base64}\\' style=\\'max-width: 100%;\\'>');" class="bg-white/90 backdrop-blur px-4 py-2 rounded-lg text-xs font-bold text-slate-900 shadow-xl hover:bg-white transition-colors">
+                                View Full Image
+                             </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-bold text-slate-800 text-lg leading-tight pr-4">${p.name}</p>
+                            <span class="bg-${color}-50 text-${color}-700 px-3 py-1 rounded-lg text-[10px] font-black border border-${color}-100 uppercase text-center min-w-max">${p.pos}</span>
+                        </div>
                     </div>
                 </div>
             `;
         }
 
-        // --- Database Action Commands ---
+        // --- HTTP Action Commands ---
         function saveAdminOverride() {
             const newScore = parseInt(document.getElementById('override-score').value);
-            mqttClient.publish('utm/kpa/admin/update_score', JSON.stringify({ 
-                id: app.state.currentAdminViewId, 
-                newScore: newScore 
-            }), { qos: 1 });
+            fetch(`${API_URL}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: app.state.currentAdminViewId, newScore: newScore })
+            }).then(() => switchView('view-admin-dashboard')); // Refresh data automatically
             closeModal();
         }
 
         function deleteSubmission() {
-            const confirmDelete = confirm("Are you sure you want to permanently delete this student's submission from the MySQL Database?");
+            const confirmDelete = confirm("Are you sure you want to permanently delete this submission?");
             if (confirmDelete) {
-                mqttClient.publish('utm/kpa/admin/delete', app.state.currentAdminViewId.toString(), { qos: 1 });
+                fetch(`${API_URL}/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: app.state.currentAdminViewId })
+                }).then(() => switchView('view-admin-dashboard')); // Refresh data automatically
                 closeModal();
             }
         }
