@@ -23,64 +23,60 @@
 <body class="min-h-screen text-slate-800">
 
     <div id="app">
-        <section id="view-role-selection" class="view-section active min-h-screen flex flex-col items-center justify-center p-6 text-center">
-            <div class="mb-12">
+        
+        <!-- STUDENT AUTH (NOW THE MAIN LANDING PAGE) -->
+        <section id="view-student-auth" class="view-section active min-h-screen flex flex-col items-center justify-center p-6 relative">
+            
+            <!-- Main Title -->
+            <div class="mb-10 text-center">
                 <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">KUOTA PELAJAR AKTIF</h1>
                 <p class="text-slate-500 text-lg">Official Academic Activity Verification Portal</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-                <button onclick="switchView('view-student-auth')" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-500 hover:ring-4 hover:ring-blue-50 transition-all group">
-                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
-                    </div>
-                    <span class="text-2xl font-bold text-slate-800">Login as Student</span>
-                </button>
-                <button onclick="switchView('view-admin-login')" class="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm hover:border-slate-900 hover:ring-4 hover:ring-slate-100 transition-all group">
-                    <div class="w-16 h-16 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    </div>
-                    <span class="text-2xl font-bold text-slate-800">Login as Administrator</span>
-                </button>
-            </div>
-        </section>
 
-        <section id="view-student-auth" class="view-section min-h-screen flex items-center justify-center p-6">
-            <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+            <!-- Login Box -->
+            <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100 relative z-10">
                 <div id="student-login-box">
-                    <h2 class="text-2xl font-bold mb-2">Student Login</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-center text-slate-800">Student Login</h2>
                     <form onsubmit="handleStudentLogin(event)" class="space-y-4">
-                        <input type="email" id="stu-login-email" placeholder="Email Address" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <input type="password" id="stu-login-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg">Login</button>
+                        <input type="email" id="stu-login-email" placeholder="UTM Email (@graduate.utm.my)" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
+                        <input type="password" id="stu-login-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
+                        <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all mt-2">Login</button>
                     </form>
-                    <p class="mt-6 text-center text-sm text-slate-500">Don't have an account? <a href="#" onclick="toggleStudentForms(true)" class="text-blue-600 font-bold">Register</a></p>
+                    <p class="mt-8 text-center text-sm text-slate-500">Don't have an account? <a href="#" onclick="toggleStudentForms(true)" class="text-blue-600 font-bold hover:underline">Register</a></p>
                 </div>
+                
                 <div id="student-register-box" class="hidden">
-                    <h2 class="text-2xl font-bold mb-2">Create Account</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-center text-slate-800">Create Account</h2>
                     <form onsubmit="handleStudentRegister(event)" class="space-y-4">
-                        <input type="text" id="stu-reg-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <input type="email" id="stu-reg-email" placeholder="UTM Email (@graduate.utm.my)" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <input type="password" id="stu-reg-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black shadow-lg">Register Account</button>
+                        <input type="text" id="stu-reg-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
+                        <input type="email" id="stu-reg-email" placeholder="UTM Email (@graduate.utm.my)" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
+                        <input type="password" id="stu-reg-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
+                        <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black shadow-lg shadow-slate-200 transition-all mt-2">Register Account</button>
                     </form>
-                    <p class="mt-6 text-center text-sm text-slate-500">Already have an account? <a href="#" onclick="toggleStudentForms(false)" class="text-blue-600 font-bold">Login</a></p>
+                    <p class="mt-8 text-center text-sm text-slate-500">Already have an account? <a href="#" onclick="toggleStudentForms(false)" class="text-blue-600 font-bold hover:underline">Login</a></p>
                 </div>
-                <button onclick="switchView('view-role-selection')" class="mt-4 w-full text-slate-400 text-sm hover:text-slate-600">← Back</button>
             </div>
+
+            <!-- SECRET ADMIN BUTTON (EASTER EGG) -->
+            <button onclick="switchView('view-admin-login')" class="fixed bottom-6 left-6 w-12 h-12 rounded-full bg-slate-200/50 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-all opacity-40 hover:opacity-100 z-0" title="System Administrator">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </button>
         </section>
 
+        <!-- ADMIN AUTH -->
         <section id="view-admin-login" class="view-section min-h-screen flex items-center justify-center p-6">
             <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-4 border-slate-900">
-                <h2 class="text-2xl font-bold mb-8 text-slate-900">Administrator Access</h2>
+                <h2 class="text-2xl font-bold mb-8 text-center text-slate-900">Administrator Access</h2>
                 <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                    <input type="email" id="admin-login-email" placeholder="Admin Email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 outline-none">
-                    <input type="password" id="admin-login-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 outline-none">
-                    <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black shadow-lg">Access Admin Panel</button>
+                    <input type="email" id="admin-login-email" placeholder="Admin Email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 outline-none bg-slate-50 focus:bg-white transition-colors">
+                    <input type="password" id="admin-login-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-slate-900 outline-none bg-slate-50 focus:bg-white transition-colors">
+                    <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black shadow-lg shadow-slate-200 transition-all mt-2">Access Admin Panel</button>
                 </form>
-                <button onclick="switchView('view-role-selection')" class="mt-6 w-full text-slate-400 text-sm hover:text-slate-600">← Back</button>
+                <button onclick="switchView('view-student-auth')" class="mt-8 w-full text-slate-400 text-sm hover:text-slate-600 transition-colors">← Back to Student Portal</button>
             </div>
         </section>
 
+        <!-- STUDENT DASHBOARD -->
         <section id="view-student-dashboard" class="view-section min-h-screen pb-20">
             <header class="flex justify-between items-center w-full p-4 bg-white shadow-sm sticky top-0 z-10 border-b border-slate-100">
                 <div class="flex items-center space-x-3">
@@ -116,6 +112,7 @@
                     </div>
 
                     <div class="space-y-10">
+                        <!-- PROGRAMS IN COLLEGE -->
                         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
                             <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                                 <h3 class="text-lg font-bold flex items-center text-slate-800">
@@ -131,6 +128,7 @@
                             <div id="container-in" class="space-y-3"></div>
                         </div>
 
+                        <!-- PROGRAMS OUTSIDE COLLEGE -->
                         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
                             <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                                 <h3 class="text-lg font-bold flex items-center text-slate-800">
@@ -156,12 +154,14 @@
             </main>
         </section>
 
+        <!-- ADMIN DASHBOARD -->
         <section id="view-admin-dashboard" class="view-section min-h-screen pb-20">
             <header class="flex justify-between items-center w-full p-4 bg-slate-900 shadow-md sticky top-0 z-10 text-white">
                 <div class="flex items-center space-x-4">
                     <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center font-bold text-xl border border-white/20">K</div>
                     <h1 class="text-xl font-bold tracking-tight hidden md:block">Admin Dashboard</h1>
                     
+                    <!-- NEW: Settings Button for Merit Scores -->
                     <button onclick="openSettingsModal()" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm border border-blue-400 ml-4">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         <span>Merit Scores</span>
@@ -194,6 +194,7 @@
             </main>
         </section>
 
+        <!-- ADMIN MODAL: VIEW DB DETAILS -->
         <div id="admin-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-40">
             <div class="bg-white w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl flex flex-col">
                 <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
@@ -217,6 +218,7 @@
             </div>
         </div>
 
+        <!-- NEW ADMIN MODAL: MERIT SCORES SETTINGS -->
         <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl flex flex-col">
                 <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
@@ -230,7 +232,8 @@
                 </div>
                 
                 <div class="p-8 space-y-8 flex-grow overflow-y-auto custom-scroll bg-slate-50" id="settings-content">
-                    </div>
+                    <!-- Dynamic Settings Content Loaded Here -->
+                </div>
 
                 <div class="p-6 border-t border-slate-200 bg-white flex justify-end space-x-4">
                     <button onclick="closeModal('settings-modal')" class="px-8 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">Cancel</button>
@@ -512,6 +515,7 @@
             };
 
             const html = `
+                <!-- Positions -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <h3 class="font-black text-lg mb-6 text-slate-800 border-l-4 border-indigo-500 pl-4 uppercase">1. Position / Role Scores</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-6" id="settings-group-positions">
@@ -519,6 +523,7 @@
                     </div>
                 </div>
 
+                <!-- Levels (In) -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <h3 class="font-black text-lg mb-6 text-slate-800 border-l-4 border-blue-500 pl-4 uppercase">2. Highest Level (College Programs)</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-6" id="settings-group-level-in">
@@ -526,6 +531,7 @@
                     </div>
                 </div>
 
+                <!-- Levels (Out) -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <h3 class="font-black text-lg mb-6 text-slate-800 border-l-4 border-emerald-500 pl-4 uppercase">3. Highest Level (External Programs)</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-6" id="settings-group-level-out">
