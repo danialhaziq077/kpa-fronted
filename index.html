@@ -51,6 +51,7 @@
                         <input type="text" id="stu-reg-name" placeholder="Full Name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
                         <input type="email" id="stu-reg-email" placeholder="UTM Email (@graduate.utm.my)" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
                         <input type="password" id="stu-reg-pass" placeholder="Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
+                        <input type="password" id="stu-reg-pass-confirm" placeholder="Confirm Password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 focus:bg-white transition-colors">
                         <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black shadow-lg shadow-slate-200 transition-all mt-2">Register Account</button>
                     </form>
                     <p class="mt-8 text-center text-sm text-slate-500">Already have an account? <a href="#" onclick="toggleStudentForms(false)" class="text-blue-600 font-bold hover:underline">Login</a></p>
@@ -84,7 +85,7 @@
                     <h1 class="text-xl font-bold text-slate-900 tracking-tight hidden md:block">KUOTA PELAJAR AKTIF</h1>
                 </div>
                 <div class="flex items-center space-x-6">
-                    <p class="text-sm font-medium text-slate-500 hidden md:block">Student: <span id="display-name" class="font-bold text-blue-600"></span></p>
+                    <p class="text-sm font-medium text-slate-500 hidden md:block">Logged in as: <span id="display-name" class="font-bold text-blue-600"></span></p>
                     <button onclick="handleLogout()" class="bg-slate-50 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-100 transition-colors">Logout</button>
                 </div>
             </header>
@@ -98,7 +99,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Full Name</label>
-                                <input type="text" id="form-name" readonly class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none text-slate-500 cursor-not-allowed">
+                                <input type="text" id="form-name" required placeholder="Full Name for this submission" class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Matric Number</label>
@@ -320,13 +321,18 @@
             const name = document.getElementById('stu-reg-name').value;
             const email = document.getElementById('stu-reg-email').value;
             const pass = document.getElementById('stu-reg-pass').value;
+            const passConfirm = document.getElementById('stu-reg-pass-confirm').value;
 
+            if (pass !== passConfirm) return alert("Error: Passwords do not match. Please try again.");
             if (!email.endsWith('@graduate.utm.my')) return alert("Error: Must use @graduate.utm.my email.");
             if (app.state.users.find(u => u.email === email)) return alert("Email already registered.");
 
             app.state.users.push({ name, email, pass });
             localStorage.setItem('users', JSON.stringify(app.state.users));
             alert("Registration successful! You can now login.");
+            
+            // Clear the confirm field
+            document.getElementById('stu-reg-pass-confirm').value = '';
             toggleStudentForms(false);
         }
 
@@ -360,7 +366,7 @@
         // --- Student Dashboard Logic ---
         function populateStudentForm() {
             document.getElementById('display-name').innerText = app.state.activeUser.name;
-            document.getElementById('form-name').value = app.state.activeUser.name;
+            document.getElementById('form-name').value = ''; // Leave blank so user can type specific name
             document.getElementById('container-in').innerHTML = '';
             document.getElementById('container-out').innerHTML = '';
             addProgramRow('in');
@@ -442,7 +448,7 @@
                 const outRes = gatherSection('out');
 
                 const payload = {
-                    studentName: app.state.activeUser.name,
+                    studentName: document.getElementById('form-name').value, // Grabs the name they typed manually
                     matric,
                     phone,
                     student_email: app.state.activeUser.email,
@@ -459,6 +465,7 @@
                 if (!response.ok) throw new Error("Server rejected the submission");
 
                 alert("Application safely transmitted to the Database!");
+                document.getElementById('form-name').value = '';
                 document.getElementById('form-matric').value = '';
                 document.getElementById('form-phone').value = '';
                 switchView('view-student-dashboard'); 
