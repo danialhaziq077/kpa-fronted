@@ -13,6 +13,11 @@
         .view-section:not(.active) { display: none !important; }
         .view-section.active { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom scrollbar for settings modal */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="min-h-screen text-slate-800">
@@ -80,10 +85,10 @@
             <header class="flex justify-between items-center w-full p-4 bg-white shadow-sm sticky top-0 z-10 border-b border-slate-100">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">K</div>
-                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">KUOTA PELAJAR AKTIF</h1>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight hidden md:block">KUOTA PELAJAR AKTIF</h1>
                 </div>
                 <div class="flex items-center space-x-6">
-                    <p class="text-sm font-medium text-slate-500">Student: <span id="display-name" class="font-bold text-blue-600"></span></p>
+                    <p class="text-sm font-medium text-slate-500 hidden md:block">Student: <span id="display-name" class="font-bold text-blue-600"></span></p>
                     <button onclick="handleLogout()" class="bg-slate-50 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-100 transition-colors">Logout</button>
                 </div>
             </header>
@@ -112,21 +117,31 @@
 
                     <div class="space-y-10">
                         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                            <div class="flex justify-between items-center mb-6">
+                            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                                 <h3 class="text-lg font-bold flex items-center text-slate-800">
                                     <span class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mr-3 text-sm">2</span> Programs in College
                                 </h3>
-                                <button type="button" onclick="addProgramRow('in')" class="text-sm font-bold text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors">+ Add Program</button>
+                                <button type="button" onclick="addProgramRow('in')" class="text-sm font-bold text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors flex items-center"><span class="text-lg mr-1 leading-none">+</span> Add</button>
+                            </div>
+                            <div class="hidden md:flex mb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <div class="w-5/12">Program Name</div>
+                                <div class="w-3/12 pl-2">Position / Role</div>
+                                <div class="w-4/12 pl-2">Highest Level</div>
                             </div>
                             <div id="container-in" class="space-y-3"></div>
                         </div>
 
                         <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                            <div class="flex justify-between items-center mb-6">
+                            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                                 <h3 class="text-lg font-bold flex items-center text-slate-800">
                                     <span class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mr-3 text-sm">3</span> Programs outside College
                                 </h3>
-                                <button type="button" onclick="addProgramRow('out')" class="text-sm font-bold text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors">+ Add Program</button>
+                                <button type="button" onclick="addProgramRow('out')" class="text-sm font-bold text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors flex items-center"><span class="text-lg mr-1 leading-none">+</span> Add</button>
+                            </div>
+                            <div class="hidden md:flex mb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <div class="w-5/12">Program Name</div>
+                                <div class="w-3/12 pl-2">Position / Role</div>
+                                <div class="w-4/12 pl-2">Highest Level</div>
                             </div>
                             <div id="container-out" class="space-y-3"></div>
                         </div>
@@ -143,9 +158,14 @@
 
         <section id="view-admin-dashboard" class="view-section min-h-screen pb-20">
             <header class="flex justify-between items-center w-full p-4 bg-slate-900 shadow-md sticky top-0 z-10 text-white">
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-4">
                     <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center font-bold text-xl border border-white/20">K</div>
-                    <h1 class="text-xl font-bold tracking-tight">Admin Dashboard - KUOTA PELAJAR AKTIF</h1>
+                    <h1 class="text-xl font-bold tracking-tight hidden md:block">Admin Dashboard</h1>
+                    
+                    <button onclick="openSettingsModal()" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm border border-blue-400 ml-4">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span>Merit Scores</span>
+                    </button>
                 </div>
                 <button onclick="handleLogout()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-xs font-bold transition-colors">Logout</button>
             </header>
@@ -174,28 +194,51 @@
             </main>
         </section>
 
-        <div id="admin-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div class="bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl flex flex-col">
-                <div class="p-8 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-20">
+        <div id="admin-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-40">
+            <div class="bg-white w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl flex flex-col">
+                <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">Activity Verification</h2>
                     </div>
-                    <button onclick="closeModal()" class="text-slate-400 hover:text-slate-900 transition-colors">
+                    <button onclick="closeModal('admin-modal')" class="text-slate-400 hover:text-slate-900 transition-colors">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                <div id="modal-content" class="p-8 space-y-10 flex-grow"></div>
-                <div class="p-8 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center sticky bottom-0 z-20">
+                <div id="modal-content" class="p-8 space-y-10 flex-grow overflow-y-auto custom-scroll"></div>
+                <div class="p-8 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
                     <button onclick="deleteSubmission()" class="px-6 py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors flex items-center space-x-2">
                         <span>Delete DB Record</span>
                     </button>
                     <div class="flex space-x-4">
-                        <button onclick="closeModal()" class="px-8 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors">Cancel</button>
+                        <button onclick="closeModal('admin-modal')" class="px-8 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-200 transition-colors">Cancel</button>
                         <button onclick="saveAdminOverride()" class="px-8 py-3 rounded-xl font-bold bg-green-600 text-white hover:bg-green-700 transition-all shadow-lg shadow-green-100">Save Final Score</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl flex flex-col">
+                <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <h2 class="text-2xl font-bold">Merit Scores Settings</h2>
+                    </div>
+                    <button onclick="closeModal('settings-modal')" class="text-slate-400 hover:text-white transition-colors">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="p-8 space-y-8 flex-grow overflow-y-auto custom-scroll bg-slate-50" id="settings-content">
+                    </div>
+
+                <div class="p-6 border-t border-slate-200 bg-white flex justify-end space-x-4">
+                    <button onclick="closeModal('settings-modal')" class="px-8 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">Cancel</button>
+                    <button onclick="saveMeritSettings()" class="px-8 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">Save System Variables</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -205,15 +248,24 @@
         const API_URL = 'https://kpa-backend-1.onrender.com/api'; 
         // ====================================================================
 
+        // DEFAULT SCORING MATRIX
+        const defaultScores = {
+            positions: {
+                "PENGARAH": 0, "TIMBALAN PENGARAH": 0, "SETIAUSAHA": 0, "BENDAHARI": 0,
+                "TIMBALAN SETIAUSAHA": 0, "TIMBALAN BENDAHARI": 0, "KETUA UNIT": 0, "KREW": 0, "PESERTA": 0
+            },
+            levels: {
+                in: { "ANTARABANGSA": 0, "KEBANGSAAN": 0, "KOLEJ (BESAR)": 0, "KOLEJ (KECIL)": 0, "KELAB": 0 },
+                out: { "ANTARABANGSA": 0, "KEBANGSAAN": 0, "UNIVERSITI": 0, "FAKULTI / KELAB": 0 }
+            }
+        };
+
         const app = {
             state: {
                 users: JSON.parse(localStorage.getItem('users')) || [],
                 dbSubmissions: [],
                 activeUser: null,
-                matrix: {
-                    in: { "Pengarah": 100, "Timbalan Pengarah": 80, "Setiausaha": 80, "Bendahari": 80, "AJK Program": 70, "Peserta": 60 },
-                    out: { "Pengarah": 50, "Timbalan Pengarah": 30, "Setiausaha": 30, "Bendahari": 30, "AJK Program": 20, "Peserta": 10 }
-                },
+                scores: JSON.parse(localStorage.getItem('kpa_merit_scores')) || defaultScores,
                 currentAdminViewId: null
             },
             init() {
@@ -237,7 +289,6 @@
             if (viewId === 'view-admin-dashboard') {
                 document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="p-5 text-center text-slate-500">Loading data from Database...</td></tr>';
                 
-                // Fetch Data using Standard HTTP instead of MQTT
                 fetch(`${API_URL}/submissions`)
                     .then(res => res.json())
                     .then(data => {
@@ -256,8 +307,8 @@
             document.getElementById('student-register-box').classList.toggle('hidden', !showRegister);
         }
 
-        function closeModal() {
-            document.getElementById('admin-modal').classList.add('hidden');
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
         }
 
         // --- Auth Logic ---
@@ -315,21 +366,36 @@
 
         function addProgramRow(type) {
             const container = document.getElementById(`container-${type}`);
-            if (container.children.length >= 5) return;
+            if (container.children.length >= 10) return;
 
             const rowId = `row-${type}-${Date.now()}`;
             const div = document.createElement('div');
             div.id = rowId;
-            div.className = "grid grid-cols-1 md:grid-cols-3 gap-4 items-center border border-slate-100 p-4 rounded-xl mb-2 bg-slate-50/50 shadow-sm";
+            div.className = "flex flex-col md:flex-row gap-3 items-center border border-slate-100 p-4 md:p-2 md:pl-4 rounded-xl mb-2 bg-slate-50/50 shadow-sm transition-all hover:border-blue-200";
+            
+            // Generate the dynamic Position and Level options
+            const positionOptions = Object.keys(app.state.scores.positions).map(p => `<option value="${p}">${p}</option>`).join('');
+            const levelOptions = Object.keys(app.state.scores.levels[type]).map(l => `<option value="${l}">${l}</option>`).join('');
+
             div.innerHTML = `
-                <div class="md:col-span-2">
-                    <input type="text" placeholder="Program Name" class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-name" required>
+                <div class="w-full md:w-5/12">
+                    <label class="block md:hidden text-[10px] font-bold text-slate-400 uppercase mb-1">Program Name</label>
+                    <input type="text" placeholder="e.g. Karnival Sukan" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none prog-name focus:ring-2 focus:ring-blue-500" required>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <select class="w-full p-2 border border-slate-200 rounded-lg outline-none prog-pos">
-                        ${Object.keys(app.state.matrix[type]).map(p => `<option value="${p}">${p}</option>`).join('')}
+                <div class="w-full md:w-3/12">
+                    <label class="block md:hidden text-[10px] font-bold text-slate-400 uppercase mb-1">Position / Role</label>
+                    <select class="w-full p-2.5 border border-slate-200 rounded-lg outline-none prog-pos bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                        ${positionOptions}
                     </select>
-                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-slate-300 hover:text-red-500 transition-colors">
+                </div>
+                <div class="w-full md:w-4/12 flex items-end md:items-center space-x-3">
+                    <div class="flex-grow">
+                        <label class="block md:hidden text-[10px] font-bold text-slate-400 uppercase mb-1">Highest Level</label>
+                        <select class="w-full p-2.5 border border-slate-200 rounded-lg outline-none prog-level bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                            ${levelOptions}
+                        </select>
+                    </div>
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="bg-red-50 p-2.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-100 transition-colors shrink-0 md:mt-0 mt-5">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </div>
@@ -341,22 +407,29 @@
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
-            btn.innerText = "Processing...";
+            btn.innerText = "Processing Data...";
 
             const matric = document.getElementById('form-matric').value;
             const phone = document.getElementById('form-phone').value;
 
+            // Updated Data Gatherer with the new specific Math Engine
             const gatherSection = (type) => {
                 const rows = Array.from(document.getElementById(`container-${type}`).children);
                 const data = [];
                 let total = 0;
+                
                 for (let row of rows) {
                     const name = row.querySelector('.prog-name').value;
                     const pos = row.querySelector('.prog-pos').value;
-                    const score = app.state.matrix[type][pos];
+                    const level = row.querySelector('.prog-level').value;
                     
-                    data.push({ name, pos, score });
-                    total += score;
+                    // NEW MATH LOGIC: (Position Score + Highest Level Score)
+                    const posScore = parseInt(app.state.scores.positions[pos]) || 0;
+                    const levelScore = parseInt(app.state.scores.levels[type][level]) || 0;
+                    const combinedScore = posScore + levelScore;
+                    
+                    data.push({ name, pos, level, score: combinedScore });
+                    total += combinedScore;
                 }
                 return { data, total };
             };
@@ -421,12 +494,79 @@
             });
         }
 
+        // --- NEW ADMIN MODAL LOGIC (Merit Settings Engine) ---
+        function openSettingsModal() {
+            const renderInputs = (obj, prefix) => {
+                return Object.keys(obj).map(key => {
+                    const safeId = btoa(key).replace(/=/g, ''); // Safely encode the ID to handle spaces/slashes
+                    return `
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">${key}</label>
+                            <div class="relative">
+                                <input type="number" id="${prefix}-${safeId}" data-key="${key}" value="${obj[key]}" class="w-full p-3 pl-4 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all font-bold text-slate-800">
+                                <span class="absolute right-4 top-3.5 text-xs font-bold text-slate-300">PTS</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            const html = `
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <h3 class="font-black text-lg mb-6 text-slate-800 border-l-4 border-indigo-500 pl-4 uppercase">1. Position / Role Scores</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6" id="settings-group-positions">
+                        ${renderInputs(app.state.scores.positions, 'pos')}
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <h3 class="font-black text-lg mb-6 text-slate-800 border-l-4 border-blue-500 pl-4 uppercase">2. Highest Level (College Programs)</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6" id="settings-group-level-in">
+                        ${renderInputs(app.state.scores.levels.in, 'lvl-in')}
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <h3 class="font-black text-lg mb-6 text-slate-800 border-l-4 border-emerald-500 pl-4 uppercase">3. Highest Level (External Programs)</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6" id="settings-group-level-out">
+                        ${renderInputs(app.state.scores.levels.out, 'lvl-out')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('settings-content').innerHTML = html;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function saveMeritSettings() {
+            // Helper to extract values
+            const extractGroup = (groupId, stateObj) => {
+                const group = document.getElementById(groupId);
+                const inputs = group.querySelectorAll('input');
+                inputs.forEach(input => {
+                    const key = input.getAttribute('data-key');
+                    stateObj[key] = parseInt(input.value) || 0;
+                });
+            };
+
+            // Update the state objects
+            extractGroup('settings-group-positions', app.state.scores.positions);
+            extractGroup('settings-group-level-in', app.state.scores.levels.in);
+            extractGroup('settings-group-level-out', app.state.scores.levels.out);
+
+            // Save to local storage so settings persist forever
+            localStorage.setItem('kpa_merit_scores', JSON.stringify(app.state.scores));
+            
+            closeModal('settings-modal');
+            alert('Success! Grading Engine variables have been updated.');
+        }
+
+        // --- DB VIEW MODAL LOGIC (Upgraded) ---
         function openVerification(id) {
             app.state.currentAdminViewId = id;
             const sub = app.state.dbSubmissions.find(s => s.id == id);
             if (!sub) return;
             
-            // Re-parse the JSON string back into a javascript object
             let parsedPrograms = sub.programs;
             if (typeof parsedPrograms === 'string') {
                 try { parsedPrograms = JSON.parse(parsedPrograms); } catch (e) {}
@@ -454,14 +594,14 @@
                     <div>
                         <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-blue-500 pl-4 uppercase tracking-tight">College Programs Submitted</h5>
                         ${parsedPrograms?.in?.length > 0 
-                            ? `<div class="grid grid-cols-1 gap-3">${parsedPrograms.in.map(p => renderProofCard(p, 'blue')).join('')}</div>`
+                            ? `<div class="grid grid-cols-1 gap-4">${parsedPrograms.in.map(p => renderProofCard(p, 'blue')).join('')}</div>`
                             : `<p class="text-slate-400 italic text-sm">No college programs submitted.</p>`
                         }
                     </div>
                     <div>
                         <h5 class="font-bold text-slate-800 text-lg mb-6 border-l-4 border-emerald-500 pl-4 uppercase tracking-tight">External Programs Submitted</h5>
                         ${parsedPrograms?.out?.length > 0 
-                            ? `<div class="grid grid-cols-1 gap-3">${parsedPrograms.out.map(p => renderProofCard(p, 'emerald')).join('')}</div>`
+                            ? `<div class="grid grid-cols-1 gap-4">${parsedPrograms.out.map(p => renderProofCard(p, 'emerald')).join('')}</div>`
                             : `<p class="text-slate-400 italic text-sm">No external programs submitted.</p>`
                         }
                     </div>
@@ -470,12 +610,23 @@
             document.getElementById('admin-modal').classList.remove('hidden');
         }
 
+        // UPGRADED CARD: Shows position, level, and individual score
         function renderProofCard(p, color) {
             return `
-                <div class="group border border-slate-200 rounded-xl bg-white flex flex-col p-4 shadow-sm hover:border-${color}-300 transition-all">
-                    <div class="flex justify-between items-center">
-                        <p class="font-bold text-slate-800 text-md leading-tight pr-4">${p.name}</p>
-                        <span class="bg-${color}-50 text-${color}-700 px-3 py-1 rounded-lg text-[10px] font-black border border-${color}-100 uppercase text-center min-w-max">${p.pos}</span>
+                <div class="group border border-slate-200 rounded-xl bg-white flex flex-col p-5 shadow-sm hover:border-${color}-300 transition-all">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center">
+                        <div class="mb-3 md:mb-0">
+                            <p class="font-bold text-slate-800 text-lg leading-tight mb-2">${p.name}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border border-slate-200">${p.pos}</span>
+                                <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border border-slate-200">${p.level || 'No Level'}</span>
+                            </div>
+                        </div>
+                        <div class="flex shrink-0">
+                            <span class="bg-${color}-50 text-${color}-700 px-4 py-2 rounded-lg text-sm font-black border border-${color}-200 uppercase whitespace-nowrap shadow-sm">
+                                + ${p.score || 0} Points
+                            </span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -489,7 +640,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: app.state.currentAdminViewId, newScore: newScore })
             }).then(() => switchView('view-admin-dashboard')); // Refresh data automatically
-            closeModal();
+            closeModal('admin-modal');
         }
 
         function deleteSubmission() {
@@ -500,7 +651,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: app.state.currentAdminViewId })
                 }).then(() => switchView('view-admin-dashboard')); // Refresh data automatically
-                closeModal();
+                closeModal('admin-modal');
             }
         }
 
