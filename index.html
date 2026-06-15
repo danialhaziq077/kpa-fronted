@@ -163,10 +163,19 @@
 
             <main class="max-w-6xl mx-auto mt-10 px-6">
                 <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Live Database Tier List</h3>
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase" id="submission-count">Loading DB...</span>
+                    
+                    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <div class="flex items-center space-x-3">
+                            <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">Live Database Tier List</h3>
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase" id="submission-count">Loading DB...</span>
+                        </div>
+                        
+                        <div class="relative w-full md:w-80">
+                            <input type="text" id="admin-search" oninput="renderLeaderboard()" placeholder="Search Name or Matric..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-slate-700">
+                            <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
                     </div>
+
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50 border-b border-slate-100">
@@ -255,11 +264,10 @@
             state: {
                 dbSubmissions: [],
                 activeUser: null,
-                scores: defaultScores, // Will be overwritten by the cloud DB instantly
+                scores: defaultScores, 
                 currentAdminViewId: null
             },
             async init() {
-                // 1. FETCH THE GLOBAL RULEBOOK FIRST
                 try {
                     const res = await fetch(`${API_URL}/settings/merit`);
                     if (res.ok) {
@@ -270,7 +278,6 @@
                     console.log("Could not reach DB for scores, using default 0s.", err);
                 }
 
-                // 2. CHECK IF USER IS ALREADY LOGGED IN
                 const sessionUser = localStorage.getItem('logged_in_user');
                 if (sessionUser) {
                     app.state.activeUser = JSON.parse(sessionUser);
@@ -288,6 +295,10 @@
             if (viewId === 'view-admin-dashboard') {
                 document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="5" class="p-5 text-center text-slate-500">Loading data from Database...</td></tr>';
                 
+                // Clear out the search bar when we enter the dashboard
+                const searchInput = document.getElementById('admin-search');
+                if (searchInput) searchInput.value = '';
+
                 fetch(`${API_URL}/submissions`)
                     .then(res => res.json())
                     .then(data => {
@@ -310,13 +321,12 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        // --- AUTHENTICATION (NOW COMPLETELY CLOUD-BASED) ---
+        // --- AUTHENTICATION ---
         
         async function handleStudentRegister(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-register');
-            btn.disabled = true;
-            btn.innerText = "Please wait...";
+            btn.disabled = true; btn.innerText = "Please wait...";
 
             const name = document.getElementById('stu-reg-name').value;
             const email = document.getElementById('stu-reg-email').value;
@@ -325,13 +335,11 @@
 
             if (pass !== passConfirm) {
                 alert("Error: Passwords do not match. Please try again.");
-                btn.disabled = false; btn.innerText = "Register Account";
-                return;
+                btn.disabled = false; btn.innerText = "Register Account"; return;
             }
             if (!email.endsWith('@graduate.utm.my')) {
                 alert("Error: Must use @graduate.utm.my email.");
-                btn.disabled = false; btn.innerText = "Register Account";
-                return;
+                btn.disabled = false; btn.innerText = "Register Account"; return;
             }
 
             try {
@@ -347,18 +355,14 @@
                 alert("Registration successful! You can now login.");
                 document.getElementById('stu-reg-pass-confirm').value = '';
                 toggleStudentForms(false);
-            } catch (err) {
-                alert(err.message);
-            } finally {
-                btn.disabled = false; btn.innerText = "Register Account";
-            }
+            } catch (err) { alert(err.message); } 
+            finally { btn.disabled = false; btn.innerText = "Register Account"; }
         }
 
         async function handleStudentLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-login');
-            btn.disabled = true;
-            btn.innerText = "Checking credentials...";
+            btn.disabled = true; btn.innerText = "Checking credentials...";
 
             const email = document.getElementById('stu-login-email').value;
             const pass = document.getElementById('stu-login-pass').value;
@@ -373,15 +377,11 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || "Login failed.");
 
-                // Save basic user info to local session just to keep them logged in
                 app.state.activeUser = data.user;
                 localStorage.setItem('logged_in_user', JSON.stringify(data.user));
                 switchView('view-student-dashboard');
-            } catch (err) {
-                alert(err.message);
-            } finally {
-                btn.disabled = false; btn.innerText = "Login";
-            }
+            } catch (err) { alert(err.message); } 
+            finally { btn.disabled = false; btn.innerText = "Login"; }
         }
 
         function handleAdminLogin(e) {
@@ -450,8 +450,7 @@
         async function handleApplicationSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-            btn.innerText = "Processing Data...";
+            btn.disabled = true; btn.innerText = "Processing Data...";
 
             const matric = document.getElementById('form-matric').value;
             const phone = document.getElementById('form-phone').value;
@@ -503,24 +502,47 @@
                 document.getElementById('form-phone').value = '';
                 switchView('view-student-dashboard'); 
             } catch (err) {
-                console.error(err);
-                alert("Error submitting application. Check your connection.");
+                console.error(err); alert("Error submitting application. Check your connection.");
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<span>Submit Application</span>`;
+                btn.disabled = false; btn.innerHTML = `<span>Submit Application</span>`;
             }
         }
 
-        // --- ADMIN DASHBOARD LOGIC ---
+        // --- UPGRADED ADMIN DASHBOARD LOGIC (WITH REAL-TIME SEARCH) ---
         
         function renderLeaderboard() {
             const body = document.getElementById('leaderboard-body');
             const count = document.getElementById('submission-count');
+            const searchInput = document.getElementById('admin-search');
+            
+            // 1. Get the current search word (convert to lowercase for easy matching)
+            const query = searchInput ? searchInput.value.toLowerCase() : "";
             
             body.innerHTML = '';
-            count.innerText = `${app.state.dbSubmissions.length} DB Records`;
+            
+            // 2. Filter the master database list
+            const filteredData = app.state.dbSubmissions.filter(sub => {
+                const nameMatch = (sub.studentName || '').toLowerCase().includes(query);
+                const matricMatch = (sub.matric || '').toLowerCase().includes(query);
+                return nameMatch || matricMatch;
+            });
 
-            app.state.dbSubmissions.forEach((sub, index) => {
+            count.innerText = `${filteredData.length} DB Records`;
+
+            // 3. Handle Empty Search Results
+            if (filteredData.length === 0) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-10 text-center text-slate-500 font-medium">
+                            No students found matching "<span class="text-slate-800">${query}</span>"
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // 4. Render the filtered list
+            filteredData.forEach((sub, index) => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50 transition-colors group";
                 row.innerHTML = `
@@ -538,7 +560,7 @@
             });
         }
 
-        // --- NEW CLOUD MERIT SETTINGS ENGINE ---
+        // --- MERIT SETTINGS ENGINE ---
         
         function openSettingsModal() {
             const renderInputs = (obj, prefix) => {
@@ -611,11 +633,8 @@
                 
                 closeModal('settings-modal');
                 alert('Success! Global Grading Engine variables have been permanently updated.');
-            } catch (err) {
-                alert("Failed to save to cloud: " + err.message);
-            } finally {
-                btn.disabled = false; btn.innerText = "Save System Variables";
-            }
+            } catch (err) { alert("Failed to save to cloud: " + err.message); } 
+            finally { btn.disabled = false; btn.innerText = "Save System Variables"; }
         }
 
         // --- DB VIEW MODAL LOGIC ---
